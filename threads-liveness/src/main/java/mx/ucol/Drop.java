@@ -19,22 +19,31 @@ public class Drop {
         empty = true;
         notifyAll();
 
-        //String ultimo = message.get(message.size() - 1);
-        return message.get(message.size()-1);
+        int ultimo = message.size() - 1;
+        String mensaje =message.get(ultimo);
+        //Con esas impresiones en consola verifico el tamaño de mi array
+        //para saber que nunca sobrepasa el limite de 10
+        //System.out.println("Tamaño de mi array:"+message.size() );
+        message.remove(ultimo);
+        //System.out.println("Tamaño de mi array:"+message.size() );
+        return mensaje;
         //message.remove(ultimo);
     }
 
     public synchronized void put(String message) {
 
-            while (!empty) {
+        int size = this.message.size();
+        //System.out.println("Array:"+size);
+        while ( !(this.message.isEmpty()) && size<10) {
                 try {
                     wait();
                 } catch (InterruptedException e) {}
             }
 
             empty = false;
-
-            this.message.add(message);
+        if(size>=10){System.out.println("Buffer is in the limit of 10 wait");}
+        else {
+            this.message.add(message);}
 
         notifyAll();
     }

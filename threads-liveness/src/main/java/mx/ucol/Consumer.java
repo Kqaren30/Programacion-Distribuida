@@ -13,7 +13,8 @@ public class Consumer implements Runnable {
         Random random = new Random();
 
         for (String message = drop.take(); !message.equals("DONE"); message = drop.take()) {
-            System.out.format("MESSAGE RECEIVED: %s%n", message);
+            System.out.format("%s [Consumer]:MESSAGE RECEIVED: %s%n",
+                    Thread.currentThread().getName(),message);
 
             try {
                 Thread.sleep(random.nextInt(5000));

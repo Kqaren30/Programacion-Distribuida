@@ -11,15 +11,17 @@ public class Producer implements Runnable {
 
     public void run() {
         String importantInfo[] = {
-            "Producer1:A1",
-             "Producer1:A2"
+            "Hello this is",
+            "only a test",
+            "Made by Karen Robles"
         };
 
         Random random = new Random();
 
         for (int i = 0; i < importantInfo.length; i++) {
             drop.put(importantInfo[i]);
-
+            System.out.format("%s [Producer]:Introduced '%s' to the Drop buffer%n",
+                    Thread.currentThread().getName(),importantInfo[i]);
             try {
                 Thread.sleep(random.nextInt(5000));
             } catch (InterruptedException e) {}

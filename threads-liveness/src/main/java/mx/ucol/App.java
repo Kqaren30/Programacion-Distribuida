@@ -43,17 +43,17 @@ public class App {
         new Thread(new Producer(drop)).start();
         new Thread(new Consumer(drop)).start();
 
-        new Thread(new Producer2(drop)).start();
-        new Thread(new Consumer2(drop)).start();
+        new Thread(new Producer(drop)).start();
+        new Thread(new Consumer(drop)).start();
 
-        new Thread(new Producer3(drop)).start();
-        new Thread(new Consumer3(drop)).start();
+        new Thread(new Producer(drop)).start();
+        new Thread(new Consumer(drop)).start();
 
-        new Thread(new Producer4(drop)).start();
-        new Thread(new Consumer4(drop)).start();
+        new Thread(new Producer(drop)).start();
+        new Thread(new Consumer(drop)).start();
 
-        new Thread(new Producer5(drop)).start();
-        new Thread(new Consumer5(drop)).start();
+        new Thread(new Producer(drop)).start();
+        new Thread(new Consumer(drop)).start();
 
 
     }
