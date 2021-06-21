@@ -1,16 +1,13 @@
 package mx.ucol.httpserver;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+
+import java.io.DataOutputStream;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.io.FileNotFoundException;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 public class ClientHandler implements Runnable {
@@ -20,30 +17,13 @@ public class ClientHandler implements Runnable {
     this.socket = socket;
   }
 
-  public List<String> readContent(File nameFile){
-    Scanner reader=null;
-    File myFile = new File("www" + nameFile+".html");
-    System.out.println("www" + nameFile+".html");
-    List<String> fileData = new ArrayList<String>();
-    try {
-      reader= new Scanner(nameFile);
-      while (reader.hasNextLine()) {
-        String data = reader.nextLine();
-        fileData.add(data);
-      }
-      reader.close();
-    } catch (FileNotFoundException e) {
-      System.out.println("An error occurred: " + e.getMessage());
-    }
-    return fileData;
-  }
-
   public void run() {
-    PrintWriter output = null;
+    DataOutputStream output = null;
     BufferedReader input = null;
 
     try {
-      output = new PrintWriter(socket.getOutputStream(), true);
+      //output = new PrintWriter(socket.getOutputStream(), true);
+      output = new DataOutputStream(socket.getOutputStream());
       input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
       String received;
@@ -55,25 +35,35 @@ public class ClientHandler implements Runnable {
           // If the resource equals "/" it should open index.html
           System.out.println("Resource: " + requestArray[1]);
 
-         // String nameFile = requestArray[1];
-          File nameFile;
-          nameFile= new File(requestArray[1]);
-          String contenido = "";
+          String resourceName=requestArray[1].equals("/") ? "/index.html" : requestArray[1];
+          String resourcePath="./www"+resourceName;
+          Path filePath = Paths.get(resourcePath);
 
-          for (String s : readContent(nameFile)) {
-            System.out.println(s);
-            contenido += s;
+          boolean fileExists = Files.exists(filePath, LinkOption.NOFOLLOW_LINKS);
+
+          if(!fileExists) filePath = Paths.get("./www/not-found.html");
+
+          String response = null;
+          byte[] fileContent = null;
+          int contentLength = 0;
+
+          if(fileExists) {
+            response = "HTTP/1.1 200 OK\r\n";
+          } else {
+            response = "HTTP/1.1 404\r\n";
           }
-          System.out.println(contenido);
 
-          // Update the htmlResponse variable with the file contents
-          String htmlResponse = contenido;
-         // System.out.println(read.Content());
-          int contentLength = htmlResponse.length();
+          //buffer donde esta mi archivo completo
+          fileContent = Files.readAllBytes(filePath);
+          contentLength = fileContent.length;
+          String mimeType = Files.probeContentType(filePath);
+          // System.out.println("MIME type: "+mimeType);
 
-          // This line should not be modified just yet
-          output.write("HTTP/1.1 200 OK\r\nContent-Length: " +
-            String.valueOf(contentLength) + "\r\n\r\n" + htmlResponse);
+          response += "Content-Type: " + mimeType + "\r\n";
+          response += "Content-Length:" + String.valueOf(contentLength) + "\r\n\r\n";
+
+          output.writeBytes(response);
+          output.write(fileContent, 0, contentLength);
 
           // We already sent the response, break the loop
           break;
